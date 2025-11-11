@@ -1,5 +1,14 @@
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import React, { useState } from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+  Image,
+} from 'react-native';
 
 const ForgetPassword = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -26,10 +35,11 @@ const ForgetPassword = ({ navigation }) => {
         return;
       }
 
-      // Success: tell user and go to OTP input screen
-      Alert.alert('OTP sent', 'Check your email for the OTP to reset your password.', [
-        { text: 'OK', onPress: () => navigation.navigate('OTPReset', { email }) },
-      ]);
+      Alert.alert(
+        'OTP sent',
+        'Check your email for the OTP to reset your password.',
+        [{ text: 'OK', onPress: () => navigation.navigate('OTPReset', { email }) }]
+      );
     } catch (e) {
       console.error('Forgot password error:', e);
       Alert.alert('Network error', 'Could not reach the server.');
@@ -39,25 +49,44 @@ const ForgetPassword = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>Forget Password</Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Email Address"
-        keyboardType="email-address"
-        autoCapitalize="none"
-        value={email}
-        onChangeText={setEmail}
+    <View style={styles.screen}>
+      {/* Logo on top */}
+      <Image
+        source={require('../../assets/threatforge_logo.png')} // adjust if needed
+        style={styles.logo}
+        resizeMode="contain"
       />
 
-      <TouchableOpacity
-        style={[styles.button, loading && { opacity: 0.7 }]}
-        onPress={handleForgetPassword}
-        disabled={loading}
-      >
-        {loading ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.buttonText}>Submit</Text>}
-      </TouchableOpacity>
+      <View style={styles.form}>
+        <Text style={styles.title}>Forget Password</Text>
+
+        <TextInput
+          style={styles.input}
+          placeholder="Email Address"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          value={email}
+          onChangeText={setEmail}
+        />
+
+        <TouchableOpacity
+          style={[styles.button, loading && { opacity: 0.7 }]}
+          onPress={handleForgetPassword}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" size="small" />
+          ) : (
+            <Text style={styles.buttonText}>Submit</Text>
+          )}
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+          <Text style={styles.link}>
+            Remembered your password? <Text style={styles.loginText}>Log In</Text>
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -65,9 +94,59 @@ const ForgetPassword = ({ navigation }) => {
 export default ForgetPassword;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'flex-start', alignItems: 'flex-start', padding: 20, backgroundColor: '#e6f0fb' },
-  heading: { fontSize: 26, fontWeight: '700', marginBottom: 25 },
-  input: { width: '100%', backgroundColor: 'white', borderRadius: 6, borderWidth: 1, borderColor: '#ccc', padding: 12, marginBottom: 12 },
-  button: { backgroundColor: '#1976D2', paddingVertical: 12, borderRadius: 6, width: '100%', alignItems: 'center', justifyContent: 'center' },
-  buttonText: { color: '#fff', fontSize: 16, textAlign: 'center', fontWeight: '600' },
+  screen: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 0,
+  },
+  logo: {
+    width: 200,
+    height: 100,
+    marginBottom: 50,
+    marginTop: -200, 
+  },
+  form: {
+    width: '86%',
+    maxWidth: 360,
+    alignSelf: 'center',
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: 20,
+  },
+  input: {
+    width: '100%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    marginBottom: 16,
+  },
+  button: {
+    backgroundColor: '#0a6981ff',
+    paddingVertical: 12,
+    borderRadius: 8,
+    width: '100%',
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  link: {
+    color: '#6B7280',
+    marginTop: 15,
+  },
+  loginText: {
+    color: '#0a6981ff',
+    fontWeight: '700',
+  },
 });

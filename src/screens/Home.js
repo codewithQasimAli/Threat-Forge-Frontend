@@ -112,7 +112,7 @@ export default Home;
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#e6f0fb",
+    backgroundColor: "#FFFFFF",
     padding: 14,
   },
 
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "#2e90fa",
+    backgroundColor: "#0a6981ff",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#2e90fa",
+    backgroundColor: "#0a6981ff",
     alignItems: "center",
     justifyContent: "center",
   },

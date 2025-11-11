@@ -170,7 +170,7 @@ export default function UpdateDevice({ route, navigation }) {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#e6f0fb' },
+  screen: { flex: 1, backgroundColor: '#FFFFFF' },
   heading: { fontSize: 22, fontWeight: '700', marginBottom: 16 },
   label: { fontSize: 13, color: '#444', marginTop: 10, marginBottom: 6 },
   input: {
@@ -187,10 +187,10 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 18,
   },
-  chipText: { color: "#1976D2" },
+  chipText: { color: "#0a6981ff" },
   button: {
     marginTop: 20,
-    backgroundColor: "#1976D2",
+    backgroundColor: "#0a6981ff",
     paddingVertical: 14,
     borderRadius: 10,
     alignItems: 'center',

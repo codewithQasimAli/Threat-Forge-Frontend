@@ -77,10 +77,10 @@ export default function Settings({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#e6f0fb' },
+  screen: { flex: 1, backgroundColor: '#FFFFFF' },
   content: { padding: 16, paddingBottom: 32 },
   cardTop: {
-    backgroundColor: '#e6f0fb',
+    backgroundColor: '#f0f5f5ff',
     borderRadius: 16,
     paddingVertical: 24,
     paddingHorizontal: 16,

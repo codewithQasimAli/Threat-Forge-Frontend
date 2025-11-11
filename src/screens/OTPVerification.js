@@ -1,5 +1,14 @@
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  ActivityIndicator,
+  Image,
+} from 'react-native';
 
 const OTPVerification = ({ route, navigation }) => {
   const { email, message } = route.params || {};
@@ -21,8 +30,6 @@ const OTPVerification = ({ route, navigation }) => {
       });
 
       const data = await res.json().catch(() => ({}));
-      console.log('Verify OTP:', res.status, data);
-
       if (!res.ok) {
         Alert.alert('Verification failed', data?.detail || 'Please try again.');
         return;
@@ -47,26 +54,41 @@ const OTPVerification = ({ route, navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Verify your email</Text>
-      <Text style={styles.subtitle}>{message || 'Check your email for the OTP.'}</Text>
-      <Text style={styles.email}>{email}</Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Enter OTP"
-        keyboardType="number-pad"
-        value={otp}
-        onChangeText={setOtp}
+    <View style={styles.screen}>
+      {/* Logo */}
+      <Image
+        source={require('../../assets/threatforge_logo.png')} // adjust path if needed
+        style={styles.logo}
+        resizeMode="contain"
       />
 
-      <TouchableOpacity style={[styles.button, loading && { opacity: 0.7 }]} onPress={handleEmailVerify} disabled={loading}>
-        {loading ? (
-          <ActivityIndicator color="#fff" size="small" />
-        ) : (
-          <Text style={styles.buttonText}>Verify</Text>
-        )}
-      </TouchableOpacity>
+      {/* Narrow, centered form */}
+      <View style={styles.form}>
+        <Text style={styles.title}>Verify your email</Text>
+        {!!message && <Text style={styles.subtitle}>{message}</Text>}
+        {!!email && <Text style={styles.email}>{email}</Text>}
+
+        <TextInput
+          style={styles.input}
+          placeholder="Enter OTP"
+          keyboardType="number-pad"
+          value={otp}
+          onChangeText={setOtp}
+          maxLength={8}
+        />
+
+        <TouchableOpacity
+          style={[styles.button, loading && { opacity: 0.7 }]}
+          onPress={handleEmailVerify}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" size="small" />
+          ) : (
+            <Text style={styles.buttonText}>Verify</Text>
+          )}
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -74,17 +96,64 @@ const OTPVerification = ({ route, navigation }) => {
 export default OTPVerification;
 
 const styles = StyleSheet.create({
-  container:{ flex:1, padding:20, justifyContent:'center',backgroundColor:"#e6f0fb" },
-  title:{ fontSize:22, fontWeight:'700', marginBottom:8, textAlign:'center' },
-  subtitle:{ color:'#444', marginBottom:6, textAlign:'center' },
-  email:{ color:'#1976D2', marginBottom:16, textAlign:'center' },
-  input:{ borderWidth:1, borderColor:'#ccc', borderRadius:6, padding:12, marginBottom:12,backgroundColor:"white" },
-  button:{
-    backgroundColor:'#1976D2',
-    borderRadius:6,
-    paddingVertical:12,
-    alignItems:'center',
-    justifyContent:'center',
+  screen: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',     // white like your mock
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 0,
   },
-  buttonText:{ color:'#fff', textAlign:'center', fontWeight:'600' },
+  logo: {
+    width: 200,
+    height: 100,
+    marginBottom: 50,
+    marginTop: -200, 
+  },
+  form: {
+    width: '86%',
+    maxWidth: 360,
+    alignSelf: 'center',
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: 6,
+    alignSelf: 'flex-start',
+  },
+  subtitle: {
+    color: '#444',
+    marginBottom: 4,
+    alignSelf: 'flex-start',
+  },
+  email: {
+    color: '#0a6981ff',
+    marginBottom: 14,
+    alignSelf: 'flex-start',
+    fontWeight: '600',
+  },
+  input: {
+    width: '100%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    marginBottom: 16,
+    letterSpacing: 2,
+  },
+  button: {
+    backgroundColor: '#0a6981ff',
+    paddingVertical: 12,
+    borderRadius: 8,
+    width: '100%',
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
+  },
 });

@@ -15,7 +15,7 @@ export default function AppTabs() {
         headerShown: false,
         tabBarShowLabel: true,
         tabBarStyle: {
-          backgroundColor: '#1976D2', 
+          backgroundColor: '#1d8ca9', 
           borderTopWidth: 0,
           height: 70,
           paddingBottom: 10,

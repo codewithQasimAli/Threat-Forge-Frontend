@@ -1,13 +1,24 @@
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import React, { useState } from 'react';
+import {
+  Alert,
+  ActivityIndicator,
+  Image,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons'; 
 import { useUser } from '../context/UserContext';
 
-
 const Login = ({ navigation }) => {
-  const [email, setEmail] = useState('');
+  const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const { setUserData, user } = useUser();
+  const [passwordVisible, setPasswordVisible] = useState(false); 
+  const [loading, setLoading]   = useState(false);
+  const { setUserData } = useUser();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -30,11 +41,7 @@ const Login = ({ navigation }) => {
         return;
       }
 
-      // Store user data in context
       setUserData(data.user);
-
-
-
       Alert.alert('Success', 'Logged in successfully.', [
         { text: 'OK', onPress: () => navigation.replace('Main') },
       ]);
@@ -47,54 +54,74 @@ const Login = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>Log in</Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Email Address"
-        keyboardType="email-address"
-        autoCapitalize="none"
-        value={email}
-        onChangeText={setEmail}
+    <View style={styles.screen}>
+      {/* Top logo (same as Sign up) */}
+      <Image
+        source={require('../../assets/threatforge_logo.png')}
+        style={styles.logo}
+        resizeMode="contain"
       />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
+      {/* Narrow, centered form */}
+      <View style={styles.form}>
+        <Text style={styles.title}>Log in</Text>
 
-      <Text
-        style={{
-          fontSize: 14,
-          textAlign: 'right',
-          color: '#1976D2',
-          fontWeight: '500',
-          width: '100%',
-          marginBottom: 8,
-        }}
-        onPress={() => navigation.navigate('ForgetPassword')}
-      >Forget Password</Text>
-      <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
-        <Text style={styles.link}>
-          Don't have an account? <Text style={styles.loginText}>Sign Up</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Email Address"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          value={email}
+          onChangeText={setEmail}
+        />
+
+        {/* Password with eye toggle */}
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            secureTextEntry={!passwordVisible}
+            value={password}
+            onChangeText={setPassword}
+          />
+          <TouchableOpacity
+            style={styles.eyeIcon}
+            onPress={() => setPasswordVisible(v => !v)}
+            hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}
+          >
+            <Ionicons
+              name={passwordVisible ? 'eye' : 'eye-off'}
+              size={20}
+              color="#6B7280"
+            />
+          </TouchableOpacity>
+        </View>
+
+        <Text
+          style={styles.forgot}
+          onPress={() => navigation.navigate('ForgetPassword')}
+        >
+          Forget Password
         </Text>
-      </TouchableOpacity>
 
-      <TouchableOpacity
-        style={[styles.button, loading && { opacity: 0.7 }]}
-        onPress={handleLogin}
-        disabled={loading}
-      >
-        {loading ? (
-          <ActivityIndicator color="#fff" size="small" />
-        ) : (
-          <Text style={styles.buttonText}>Log in</Text>
-        )}
-      </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
+          <Text style={styles.link}>
+            Don’t have an account? <Text style={styles.actionText}>Sign Up</Text>
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.button, loading && { opacity: 0.7 }]}
+          onPress={handleLogin}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" size="small" />
+          ) : (
+            <Text style={styles.buttonText}>Log in</Text>
+          )}
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -102,47 +129,77 @@ const Login = ({ navigation }) => {
 export default Login;
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    justifyContent: 'flex-start',
-    alignItems: 'flex-start',
-    padding: 20,
-    backgroundColor: '#e6f0fb',
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 0, 
   },
-  heading: {
-    fontSize: 26,
+  logo: {
+    width: 240,
+    height: 140,
+    marginBottom: 50,
+    marginTop: -180,           
+  },
+  form: {
+    width: '86%',
+    maxWidth: 360,
+    alignSelf: 'center',
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 23,
     fontWeight: '700',
-    marginBottom: 25,
+    color: '#111827',
+    marginBottom: 16,
   },
   input: {
     width: '100%',
-    backgroundColor: 'white',
-    borderRadius: 6,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 12,
-    marginBottom: 12,
+    borderColor: '#E5E7EB',
+    paddingHorizontal: 12,
+    paddingVertical: Platform.select({ ios: 12, android: 10 }),
+    marginBottom: 10,
+    paddingRight: 42, 
+  },
+  passwordContainer: {
+    width: '100%',
+    position: 'relative',
+    marginBottom: 10,
+  },
+  eyeIcon: {
+    position: 'absolute',
+    right: 12,
+    top: Platform.select({ ios: 14, android: 12 }),
+  },
+  forgot: {
+    fontSize: 14,
+    textAlign: 'right',
+    color: '#0a6981ff',
+    fontWeight: '600',
+    marginBottom: 10,
   },
   link: {
-    color: '#555',
-    marginBottom: 15,
+    color: '#6B7280',
+    marginBottom: 12,
   },
-  loginText: {
-    color: '#1976D2',
-    fontWeight: 'bold',
+  actionText: {
+    color: '#0a6981ff',
+    fontWeight: '700',
   },
   button: {
-    backgroundColor: '#1976D2',
+    backgroundColor: '#0a6981ff',
     paddingVertical: 12,
-    borderRadius: 6,
+    borderRadius: 8,
     width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   buttonText: {
-    color: '#fff',
-    fontSize: 16,
+    color: '#FFFFFF',
     textAlign: 'center',
-    fontWeight: '600',
+    fontSize: 15,
+    fontWeight: '700',
   },
 });

@@ -167,20 +167,21 @@ export default function Devices({ navigation }) {
         }
       />
 
-      <TouchableOpacity style={styles.addButton} onPress={addDevice}>
-        <Text style={styles.addButtonText}>Add New Device</Text>
+      <TouchableOpacity style={styles.addButtonRound} onPress={addDevice}>
+        <Text style={styles.plusIcon}>＋</Text>
       </TouchableOpacity>
+
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: "#e6f0fb" },
+  screen: { flex: 1, backgroundColor: "#FFFFFF" },
   headerRow: {
     flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: 16, paddingTop: 12, paddingBottom: 6,
   },
-  title: { fontSize: 20, fontWeight: '700', color: '#1f2937', flex: 1 },
+  title: { fontSize: 23, fontWeight: '700', color: '#1f2937', flex: 1 },
   addCircle: {
     width: 30, height: 30, borderRadius: 15,
     backgroundColor: "#1976D2", alignItems: 'center', justifyContent: 'center',
@@ -203,9 +204,33 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
 
-  addButton: {
-    margin: 16, backgroundColor: "#1976D2", borderRadius: 10,
-    paddingVertical: 14, alignItems: 'center',
-  },
-  addButtonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  addButtonContainer: {
+  width: '100%',
+  alignItems: 'center',
+  marginVertical: 20, // adjust spacing from bottom
+},
+
+  addButtonRound: {
+  backgroundColor: '#0a6981ff',
+  width: 60,
+  height: 60,
+  borderRadius: 30,
+  alignItems: 'center',
+  justifyContent: "center",
+  alignSelf: "center", // centers horizontally
+  marginVertical: 80,
+  elevation: 4,
+  shadowColor: '#000',
+  shadowOpacity: 0.3,
+  shadowRadius: 3,
+  shadowOffset: { width: 0, height: 2 },
+},
+
+  plusIcon: {
+  color: '#fff',
+  fontSize: 32,
+  fontWeight: 'bold',
+  marginTop: -2, // slight visual alignment tweak
+},
+
 });

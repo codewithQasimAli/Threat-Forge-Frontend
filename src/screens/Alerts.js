@@ -129,10 +129,10 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     paddingHorizontal: 16,
-    backgroundColor: "#e6f0fb",
+    backgroundColor: "#FFFFFF",
   },
   header: {
-    fontSize: 20,
+    fontSize: 23,
     fontWeight: '700',
     color: '#1f2937',
     paddingHorizontal: 16,
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 16, fontWeight: "800", color: "#101828", marginBottom: 2 },
   subtitle: { fontSize: 14, color: "#475467", marginBottom: 6 },
   cta: {
-    backgroundColor: "#2E90FA",
+    backgroundColor: "#0a6981ff",
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 12,

@@ -33,7 +33,7 @@ const StackNavigator = () => {
   return (
     <Stack.Navigator initialRouteName='Login'
       screenOptions={{
-        headerStyle: { backgroundColor: '#1976D2' },
+        headerStyle: { backgroundColor: '#1d8ca9' },
         headerTintColor: '#fff',
         headerTitle: () => (
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -57,12 +57,12 @@ const StackNavigator = () => {
       }}
 
     >
-      <Stack.Screen name='Signup' component={Signup} />
-      <Stack.Screen name='Login' component={Login} />
-      <Stack.Screen name="OTP" component={OTPVerification} />
-      <Stack.Screen name="ForgetPassword" component={ForgetPassword} />
-      <Stack.Screen name="OTPReset" component={OTPReset} />
-      <Stack.Screen name="ResetPassword" component={ResetPassword} />
+      <Stack.Screen name='Signup' component={Signup} options={{ headerShown: false } } />
+      <Stack.Screen name='Login' component={Login} options={{ headerShown: false } } />
+      <Stack.Screen name="OTP" component={OTPVerification} options={{ headerShown: false } } />
+      <Stack.Screen name="ForgetPassword" component={ForgetPassword} options={{ headerShown: false } } />
+      <Stack.Screen name="OTPReset" component={OTPReset} options={{ headerShown: false } } />
+      <Stack.Screen name="ResetPassword" component={ResetPassword}  />
       <Stack.Screen name="UpdateProfile" component={UpdateProfile} />
       <Stack.Screen name="AddDevice" component={AddDevice} />
       <Stack.Screen name="UpdateDevice" component={UpdateDevice} />

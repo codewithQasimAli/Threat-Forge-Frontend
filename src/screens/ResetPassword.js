@@ -1,16 +1,26 @@
 import React, { useState } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  ActivityIndicator,
+  Image,
 } from 'react-native';
-import { useUser } from '../context/UserContext';
+import Ionicons from 'react-native-vector-icons/Ionicons'; // 👁️ Eye icon
 
 export default function ResetPassword({ route, navigation }) {
   const { email } = route.params ?? '';
   const [pwd, setPwd] = useState('');
   const [confirm, setConfirm] = useState('');
+  const [showPwd, setShowPwd] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const passwordOk = p => /^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(p);
+  const passwordOk = p =>
+    /^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(p);
 
   const onSubmit = async () => {
     if (!pwd || !confirm) {
@@ -36,7 +46,6 @@ export default function ResetPassword({ route, navigation }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, new_password: pwd }),
       });
-      console.log(email, pwd)
       const data = await res.json().catch(() => ({}));
       console.log('Reset password:', res.status, data);
 
@@ -57,53 +66,132 @@ export default function ResetPassword({ route, navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>Reset Password</Text>
-      <Text style={styles.emailHint}>{email}</Text>
+    <View style={styles.screen}>
+      
 
-      <TextInput
-        style={styles.input}
-        placeholder="New Password"
-        secureTextEntry
-        value={pwd}
-        onChangeText={setPwd}
-      />
+      <View style={styles.form}>
+        <Text style={styles.heading}>Reset Password</Text>
+        <Text style={styles.emailHint}>{email}</Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Confirm New Password"
-        secureTextEntry
-        value={confirm}
-        onChangeText={setConfirm}
-      />
+        {/* New Password */}
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="New Password"
+            secureTextEntry={!showPwd}
+            value={pwd}
+            onChangeText={setPwd}
+          />
+          <TouchableOpacity
+            onPress={() => setShowPwd(!showPwd)}
+            style={styles.eyeIcon}
+          >
+            <Ionicons
+              name={showPwd ? 'eye' : 'eye-off'}
+              size={20}
+              color="#6B7280"
+            />
+          </TouchableOpacity>
+        </View>
 
-      <Text style={styles.hint}>
-        • 8+ chars • 1 uppercase • 1 number • 1 special
-      </Text>
+        {/* Confirm Password */}
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Confirm New Password"
+            secureTextEntry={!showConfirm}
+            value={confirm}
+            onChangeText={setConfirm}
+          />
+          <TouchableOpacity
+            onPress={() => setShowConfirm(!showConfirm)}
+            style={styles.eyeIcon}
+          >
+            <Ionicons
+              name={showConfirm ? 'eye' : 'eye-off'}
+              size={20}
+              color="#6B7280"
+            />
+          </TouchableOpacity>
+        </View>
 
-      <TouchableOpacity
-        style={[styles.button, loading && { opacity: 0.7 }]}
-        onPress={onSubmit}
-        disabled={loading}
-      >
-        {loading ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.buttonText}>Reset Password</Text>}
-      </TouchableOpacity>
+        <Text style={styles.hint}>• 8+ chars • 1 uppercase • 1 number • 1 special</Text>
+
+        <TouchableOpacity
+          style={[styles.button, loading && { opacity: 0.7 }]}
+          onPress={onSubmit}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" size="small" />
+          ) : (
+            <Text style={styles.buttonText}>Reset Password</Text>
+          )}
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#e6f0fb' },
-  heading: { fontSize: 26, fontWeight: '700', marginBottom: 8 },
-  emailHint: { color: '#1976D2', marginBottom: 16 },
+  screen: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 0,
+    marginBottom: 200,
+  },
+  form: {
+    width: '86%',
+    maxWidth: 360,
+    alignSelf: 'center',
+    alignItems: 'center',
+  },
+  heading: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: 8,
+  },
+  emailHint: {
+    color: '#0a6981ff',
+    marginBottom: 16,
+  },
+  passwordContainer: {
+    position: 'relative',
+    width: '100%',
+    marginBottom: 12,
+  },
   input: {
-    width: '100%', backgroundColor: '#fff', borderRadius: 6,
-    borderWidth: 1, borderColor: '#ccc', padding: 12, marginBottom: 12,
+    width: '100%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    paddingHorizontal: 12,
+    paddingVertical: 12,
   },
-  hint: { fontSize: 12, color: '#6b7280', marginBottom: 12 },
+  eyeIcon: {
+    position: 'absolute',
+    right: 12,
+    top: 14,
+  },
+  hint: {
+    fontSize: 12,
+    color: '#6B7280',
+    marginBottom: 12,
+  },
   button: {
-    backgroundColor: '#1976D2', paddingVertical: 12, borderRadius: 6,
-    width: '100%', alignItems: 'center', justifyContent: 'center',
+    backgroundColor: '#0a6981ff',
+    paddingVertical: 12,
+    borderRadius: 8,
+    width: '100%',
+    alignItems: 'center',
   },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
+  },
 });

@@ -18,7 +18,7 @@ const Chip = ({ label, selected, onPress }) => (
         onPress={onPress}
         style={[
             styles.chip,
-            selected ? { backgroundColor: "#1976D2" } : { backgroundColor: '#edf4ff' },
+            selected ? { backgroundColor: "#0a6981ff" } : { backgroundColor: '#edf4ff' },
         ]}
     >
         <Text style={[styles.chipText, selected && { color: '#fff', fontWeight: '700' }]}>
@@ -101,7 +101,7 @@ export default function AddDevice({ navigation }) {
             <Text style={styles.label}>Device Name</Text>
             <TextInput
                 style={styles.input}
-                placeholder="Baby Monitor"
+                placeholder="Device Name"
                 value={deviceName}
                 onChangeText={setDeviceName}
             />
@@ -116,7 +116,7 @@ export default function AddDevice({ navigation }) {
             <Text style={styles.label}>IP Address</Text>
             <TextInput
                 style={styles.input}
-                placeholder="192.168.1.1"
+                placeholder="192.168.0.0"
                 value={ipAddress}
                 onChangeText={setIpAddress}
                 keyboardType="numbers-and-punctuation"
@@ -154,7 +154,7 @@ export default function AddDevice({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-    screen: { flex: 1, backgroundColor: '#e6f0fb' },
+    screen: { flex: 1, backgroundColor: '#FFFFFF' },
     heading: { fontSize: 22, fontWeight: '700', marginBottom: 16 },
     label: { fontSize: 13, color: '#444', marginTop: 10, marginBottom: 6 },
     input: {
@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
     chipText: { color: "#1976D2" },
     button: {
         marginTop: 20,
-        backgroundColor: "#1976D2",
+        backgroundColor: "#0a6981ff",
         paddingVertical: 14,
         borderRadius: 10,
         alignItems: 'center',
