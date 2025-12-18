@@ -14,7 +14,6 @@ import {
 import { useUser } from '../context/UserContext';
 
 
-// Simple chips for selecting an option
 const Chip = ({ label, selected, onPress }) => (
   <TouchableOpacity
     onPress={onPress}
@@ -34,13 +33,11 @@ export default function UpdateDevice({ route, navigation }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // form fields
   const [deviceName, setDeviceName] = useState('');
-  const [deviceType, setDeviceType] = useState('Camera'); // default choice
+  const [deviceType, setDeviceType] = useState('Camera'); 
   const [ipAddress, setIpAddress] = useState('');
   const [macAddress, setMacAddress] = useState('');
-  const [status, setStatus] = useState('active'); // 'active' | 'inactive'
-
+  const [status, setStatus] = useState('active'); 
   const deviceTypeChoices = ['Camera', 'Light', 'Router','Baby Monitor'];
 
   const loadDevice = useCallback(async () => {

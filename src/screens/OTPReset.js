@@ -91,7 +91,7 @@ export default function OTPReset({ route, navigation }) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#FFFFFF',     // white like your mock
+    backgroundColor: '#FFFFFF',     
     alignItems: 'center',
     justifyContent: 'center',
     paddingTop: 0,

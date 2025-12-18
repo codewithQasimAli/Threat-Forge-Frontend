@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center', 
     paddingTop: 0,
-    marginBottom: 200,    // centers vertically
+    marginBottom: 200,    
   },
   form: {
     width: '86%',

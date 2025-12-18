@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
   addButtonContainer: {
   width: '100%',
   alignItems: 'center',
-  marginVertical: 20, // adjust spacing from bottom
+  marginVertical: 20, 
 },
 
   addButtonRound: {
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   borderRadius: 30,
   alignItems: 'center',
   justifyContent: "center",
-  alignSelf: "center", // centers horizontally
+  alignSelf: "center", 
   marginVertical: 80,
   elevation: 4,
   shadowColor: '#000',
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
   color: '#fff',
   fontSize: 32,
   fontWeight: 'bold',
-  marginTop: -2, // slight visual alignment tweak
+  marginTop: -2, 
 },
 
 });

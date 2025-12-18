@@ -98,7 +98,7 @@ export default OTPVerification;
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#FFFFFF',     // white like your mock
+    backgroundColor: '#FFFFFF',     
     alignItems: 'center',
     justifyContent: 'center',
     paddingTop: 0,
@@ -119,8 +119,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '700',
     color: '#111827',
-    marginBottom: 6,
-    alignSelf: 'flex-start',
+    marginBottom: 8,
   },
   subtitle: {
     color: '#444',
@@ -130,7 +129,6 @@ const styles = StyleSheet.create({
   email: {
     color: '#0a6981ff',
     marginBottom: 14,
-    alignSelf: 'flex-start',
     fontWeight: '600',
   },
   input: {
