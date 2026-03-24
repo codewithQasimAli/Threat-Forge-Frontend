@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
-import { useUser } from '../context/UserContext'; // Import context to get the current user
+import { useUser } from '../context/UserContext';
+import { API_BASE_URL } from '../config/api';  // ← ADDED THIS
+
 const UpdateProfile = ({ navigation }) => {
   const { user, setUserData } = useUser();
   const [name, setName] = useState(user?.name ?? '');
@@ -14,7 +16,9 @@ const UpdateProfile = ({ navigation }) => {
     }
     try {
       setLoading(true);
-      const res = await fetch(`http://10.0.2.2:8000/user/${user.email}`, {
+
+      // ← CHANGED THIS LINE
+      const res = await fetch(`${API_BASE_URL}/user/${user.email}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: name.trim(), phone: phone.trim() }),
@@ -27,7 +31,7 @@ const UpdateProfile = ({ navigation }) => {
       }
 
       setUserData({ ...user, name: name.trim(), phone: phone.trim() });
-      Alert.alert('Success', 'Profile updated successfully.', [
+      Alert.alert('Success', 'Profile updated successfully. ', [
         { text: 'OK', onPress: () => navigation.goBack() },
       ]);
     } catch (e) {
@@ -83,9 +87,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
-    justifyContent: 'center', 
+    justifyContent: 'center',
     paddingTop: 0,
-    marginBottom: 200,    
+    marginBottom: 200,
   },
   form: {
     width: '86%',
@@ -107,8 +111,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E5E7EB',
     paddingHorizontal: 20,
-    paddingVertical: Platform.select({ ios: 12, android: 10 }),
+    paddingVertical: 12,
     marginBottom: 12,
+    color: '#111827'
+
   },
   button: {
     backgroundColor: '#0a6981',

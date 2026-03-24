@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Image,
 } from 'react-native';
+import { API_BASE_URL } from '../config/api';  // ← ADDED THIS
 
 const ForgetPassword = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -21,7 +22,9 @@ const ForgetPassword = ({ navigation }) => {
     }
     try {
       setLoading(true);
-      const res = await fetch('http://10.0.2.2:8000/forgot-password', {
+
+      // ← CHANGED THIS LINE
+      const res = await fetch(`${API_BASE_URL}/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
@@ -52,7 +55,7 @@ const ForgetPassword = ({ navigation }) => {
     <View style={styles.screen}>
       {/* Logo on top */}
       <Image
-        source={require('../../assets/threatforge_logo.png')} // adjust if needed
+        source={require('../../assets/threatforge_logo.png')}
         style={styles.logo}
         resizeMode="contain"
       />
@@ -63,6 +66,7 @@ const ForgetPassword = ({ navigation }) => {
         <TextInput
           style={styles.input}
           placeholder="Email Address"
+          placeholderTextColor="#9CA3AF"
           keyboardType="email-address"
           autoCapitalize="none"
           value={email}
@@ -105,7 +109,7 @@ const styles = StyleSheet.create({
     width: 200,
     height: 100,
     marginBottom: 50,
-    marginTop: -200, 
+    marginTop: -200,
   },
   form: {
     width: '86%',
@@ -128,6 +132,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 12,
     marginBottom: 16,
+    color: '#111827'
+
   },
   button: {
     backgroundColor: '#0a6981ff',

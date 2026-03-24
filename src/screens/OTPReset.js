@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Image,
 } from 'react-native';
+import { API_BASE_URL } from '../config/api';  // ← ADDED THIS
 
 export default function OTPReset({ route, navigation }) {
   const { email } = route.params || {};
@@ -22,7 +23,9 @@ export default function OTPReset({ route, navigation }) {
     }
     try {
       setLoading(true);
-      const res = await fetch('http://10.0.2.2:8000/forgot-password/verify', {
+
+      // ← CHANGED THIS LINE
+      const res = await fetch(`${API_BASE_URL}/forgot-password/verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp }),
@@ -61,6 +64,7 @@ export default function OTPReset({ route, navigation }) {
         <TextInput
           style={styles.input}
           placeholder="Enter OTP"
+          placeholderTextColor="#9CA3AF"
           keyboardType="number-pad"
           value={otp}
           onChangeText={setOtp}
@@ -80,7 +84,7 @@ export default function OTPReset({ route, navigation }) {
 
         <TouchableOpacity onPress={() => navigation.navigate('ForgetPassword')}>
           <Text style={styles.link}>
-            Didn’t get the code? <Text style={styles.resendText}>Resend</Text>
+            Didn't get the code? <Text style={styles.resendText}>Resend</Text>
           </Text>
         </TouchableOpacity>
       </View>
@@ -91,7 +95,7 @@ export default function OTPReset({ route, navigation }) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#FFFFFF',     
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
     paddingTop: 0,
@@ -100,7 +104,7 @@ const styles = StyleSheet.create({
     width: 200,
     height: 100,
     marginBottom: 50,
-    marginTop: -200, 
+    marginTop: -200,
   },
   form: {
     width: '86%',
@@ -133,6 +137,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 12,
     marginBottom: 16,
+    color: '#111827'
+
   },
   button: {
     backgroundColor: '#0a6981ff',

@@ -10,16 +10,17 @@ import {
   Platform,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { API_BASE_URL } from '../config/api';  // ← ADDED THIS
 
 const Signup = ({ navigation }) => {
   const [fullName, setFullName] = useState('');
-  const [email, setEmail]   = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const [confirmVisible, setConfirmVisible]   = useState(false);
+  const [confirmVisible, setConfirmVisible] = useState(false);
 
   const passwordOk = (pwd) =>
     /^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(pwd);
@@ -42,7 +43,9 @@ const Signup = ({ navigation }) => {
     }
     try {
       setLoading(true);
-      const res = await fetch('http://10.0.2.2:8000/signup', {
+
+      // ← CHANGED THIS LINE
+      const res = await fetch(`${API_BASE_URL}/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: fullName, email, password }),
@@ -82,6 +85,7 @@ const Signup = ({ navigation }) => {
         <TextInput
           style={styles.input}
           placeholder="Full Name"
+          placeholderTextColor="#9CA3AF"
           value={fullName}
           onChangeText={setFullName}
         />
@@ -89,6 +93,7 @@ const Signup = ({ navigation }) => {
         <TextInput
           style={styles.input}
           placeholder="Email Address"
+          placeholderTextColor="#9CA3AF"
           keyboardType="email-address"
           autoCapitalize="none"
           value={email}
@@ -100,6 +105,7 @@ const Signup = ({ navigation }) => {
           <TextInput
             style={styles.input}
             placeholder="Password"
+            placeholderTextColor="#9CA3AF"
             secureTextEntry={!passwordVisible}
             value={password}
             onChangeText={setPassword}
@@ -122,6 +128,7 @@ const Signup = ({ navigation }) => {
           <TextInput
             style={styles.input}
             placeholder="Confirm Password"
+            placeholderTextColor="#9CA3AF"
             secureTextEntry={!confirmVisible}
             value={confirmPassword}
             onChangeText={setConfirmPassword}
@@ -167,13 +174,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: 0, 
+    paddingTop: 0,
   },
   logo: {
     width: 240,
     height: 140,
     marginBottom: 50,
-    marginTop: -180,           
+    marginTop: -180,
   },
   form: {
     width: '86%',
@@ -196,7 +203,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: Platform.select({ ios: 12, android: 10 }),
     marginBottom: 10,
-    paddingRight: 42, 
+    paddingRight: 42,
+    color: '#111827'
   },
   passwordContainer: {
     width: '100%',

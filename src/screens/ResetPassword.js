@@ -9,7 +9,8 @@ import {
   ActivityIndicator,
   Image,
 } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons'; // 👁️ Eye icon
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import { API_BASE_URL } from '../config/api';  // ← ADDED THIS
 
 export default function ResetPassword({ route, navigation }) {
   const { email } = route.params ?? '';
@@ -41,7 +42,9 @@ export default function ResetPassword({ route, navigation }) {
 
     try {
       setLoading(true);
-      const res = await fetch('http://10.0.2.2:8000/forgot-password/reset', {
+
+      // ← CHANGED THIS LINE
+      const res = await fetch(`${API_BASE_URL}/forgot-password/reset`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, new_password: pwd }),
@@ -67,8 +70,6 @@ export default function ResetPassword({ route, navigation }) {
 
   return (
     <View style={styles.screen}>
-      
-
       <View style={styles.form}>
         <Text style={styles.heading}>Reset Password</Text>
         <Text style={styles.emailHint}>{email}</Text>
@@ -78,6 +79,7 @@ export default function ResetPassword({ route, navigation }) {
           <TextInput
             style={styles.input}
             placeholder="New Password"
+            placeholderTextColor="#9CA3AF"
             secureTextEntry={!showPwd}
             value={pwd}
             onChangeText={setPwd}
@@ -99,6 +101,7 @@ export default function ResetPassword({ route, navigation }) {
           <TextInput
             style={styles.input}
             placeholder="Confirm New Password"
+            placeholderTextColor="#9CA3AF"
             secureTextEntry={!showConfirm}
             value={confirm}
             onChangeText={setConfirm}
@@ -171,6 +174,8 @@ const styles = StyleSheet.create({
     borderColor: '#E5E7EB',
     paddingHorizontal: 12,
     paddingVertical: 12,
+    color: '#111827'
+
   },
   eyeIcon: {
     position: 'absolute',

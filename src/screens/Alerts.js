@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useUser } from '../context/UserContext';
+import { API_BASE_URL, WS_BASE_URL } from '../config/api';
 
 const SEVERITY_META = {
   critical: { color: "#8B0000", bg: "#FFE5E5", icon: "alert", label: "Critical" },
@@ -18,6 +19,9 @@ const SEVERITY_META = {
   medium: { color: "#F39C12", bg: "#FFF7E6", icon: "warning", label: "Medium" },
   low: { color: "#2ECC71", bg: "#ECFDF3", icon: "information-circle", label: "Low" },
 };
+
+const BASE_URL = API_BASE_URL;
+const WS_URL = WS_BASE_URL;
 
 const FilterModal = ({ visible, onClose, selectedSeverity, onSelectSeverity, counts }) => {
   const filterOptions = [
@@ -154,7 +158,7 @@ const Alerts = () => {
   const [err, setErr] = useState("");
   const [selectedSeverity, setSelectedSeverity] = useState("all");
   const [showFilterModal, setShowFilterModal] = useState(false);
-  const [wsConnected, setWsConnected] = useState(false); // WebSocket connection status
+  const [wsConnected, setWsConnected] = useState(false);
   
   const wsRef = useRef(null);
   const reconnectTimeoutRef = useRef(null);
@@ -162,17 +166,24 @@ const Alerts = () => {
 
   // Fetch alerts from API
   const fetchAlerts = useCallback(async () => {
+    if (!user?.id) return;
     try {
-      const res = await fetch(`http://10.0.2.2:8000/alerts/alerts/user/${user.id}`);
+      const res = await fetch(`${BASE_URL}/alerts/alerts/user/${user.id}`);
       const data = await res.json().catch(() => []);
-      if (!res.ok) throw new Error(data?.detail || 'Failed to fetch alerts');
+      
+      if (!res.ok) {
+        const errorMessage = data?.detail || 'Failed to fetch alerts';
+        throw new Error(String(errorMessage));
+      }
+      
       console.log('alerts fetched:', data.length);
       setAlerts(data);
       setErr("");
     } catch (e) {
       console.error('alerts fetch error:', e);
-      setErr('Could not load alerts.');
-      Alert.alert('Error', 'Could not load alerts.');
+      const errorMsg = e.message || 'Could not load alerts.';
+      setErr(errorMsg);
+      Alert.alert('Error', String(errorMsg));
     } finally {
       setLoading(false);
     }
@@ -189,9 +200,9 @@ const Alerts = () => {
 
     try {
       console.log(`Connecting WebSocket for user ${user.id}...`);
+      console.log(`WebSocket URL: ${WS_URL}/ws/alerts?user_id=${user.id}`);
       
-      // For Android emulator: ws://10.0.2.2:8000
-      const ws = new WebSocket(`ws://10.0.2.2:8000/ws/alerts?user_id=${user.id}`);
+      const ws = new WebSocket(`${WS_URL}/ws/alerts?user_id=${user.id}`);
       
       ws.onopen = () => {
         console.log('WebSocket connected!');
@@ -288,19 +299,25 @@ const Alerts = () => {
 
   const handleAcknowledge = useCallback(async (id) => {
     try {
-      const res = await fetch(`http://10.0.2.2:8000/alerts/alerts/${id}`, {
+      const res = await fetch(`${BASE_URL}/alerts/alerts/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ acknowledged: true }),
       });
+      
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`);
+      
+      if (!res.ok) {
+        const errorMessage = data?.detail || `HTTP ${res.status}`;
+        throw new Error(String(errorMessage));
+      }
 
       setAlerts((prev) => prev.map(a => a.id === id ? { ...a, acknowledged: true } : a));
-      Alert.alert('Acknowledged', 'Alert marked as acknowledged successfully.');
+      Alert.alert('Success', 'Alert acknowledged successfully.');
     } catch (e) {
       console.error('acknowledge error:', e);
-      Alert.alert('Error', 'Failed to acknowledge alert.');
+      const errorMsg = e.message || 'Failed to acknowledge alert.';
+      Alert.alert('Error', String(errorMsg));
     }
   }, []);
 
@@ -348,7 +365,6 @@ const Alerts = () => {
       <View style={styles.headerRow}>
         <View style={styles.titleRow}>
           <Text style={styles.header}>Alerts</Text>
-          {/* WebSocket Status Indicator */}
           <View style={[styles.statusDot, { 
             backgroundColor: wsConnected ? '#10B981' : '#EF4444' 
           }]} />
@@ -571,13 +587,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
-  },
-  titleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 4,
-    gap: 8,
   },
   title: { 
     fontSize: 16, 

@@ -10,14 +10,15 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons'; 
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useUser } from '../context/UserContext';
+import { API_BASE_URL } from '../config/api';  // ← ADDED THIS
 
 const Login = ({ navigation }) => {
-  const [email, setEmail]       = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [passwordVisible, setPasswordVisible] = useState(false); 
-  const [loading, setLoading]   = useState(false);
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
   const { setUserData } = useUser();
 
   const handleLogin = async () => {
@@ -27,7 +28,9 @@ const Login = ({ navigation }) => {
     }
     try {
       setLoading(true);
-      const res = await fetch('http://10.0.2.2:8000/signin', {
+
+      // ← CHANGED THIS LINE
+      const res = await fetch(`${API_BASE_URL}/signin`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -42,7 +45,7 @@ const Login = ({ navigation }) => {
       }
 
       setUserData(data.user);
-      Alert.alert('Success', 'Logged in successfully.', [
+      Alert.alert('Success', 'Logged in successfully. ', [
         { text: 'OK', onPress: () => navigation.replace('Main') },
       ]);
     } catch (e) {
@@ -69,6 +72,7 @@ const Login = ({ navigation }) => {
         <TextInput
           style={styles.input}
           placeholder="Email Address"
+          placeholderTextColor="#9CA3AF"
           keyboardType="email-address"
           autoCapitalize="none"
           value={email}
@@ -80,6 +84,7 @@ const Login = ({ navigation }) => {
           <TextInput
             style={styles.input}
             placeholder="Password"
+            placeholderTextColor="#9CA3AF"
             secureTextEntry={!passwordVisible}
             value={password}
             onChangeText={setPassword}
@@ -106,7 +111,7 @@ const Login = ({ navigation }) => {
 
         <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
           <Text style={styles.link}>
-            Don’t have an account? <Text style={styles.actionText}>Sign Up</Text>
+            Don't have an account? <Text style={styles.actionText}>Sign Up</Text>
           </Text>
         </TouchableOpacity>
 
@@ -134,13 +139,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: 0, 
+    paddingTop: 0,
   },
   logo: {
     width: 240,
     height: 140,
     marginBottom: 50,
-    marginTop: -180,           
+    marginTop: -180,
   },
   form: {
     width: '86%',
@@ -164,6 +169,7 @@ const styles = StyleSheet.create({
     paddingVertical: Platform.select({ ios: 12, android: 10 }),
     marginBottom: 10,
     paddingRight: 42, 
+    color: '#111827',
   },
   passwordContainer: {
     width: '100%',

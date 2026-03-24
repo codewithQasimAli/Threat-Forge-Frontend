@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Image,
 } from 'react-native';
+import { API_BASE_URL } from '../config/api';  // ← ADDED THIS
 
 const OTPVerification = ({ route, navigation }) => {
   const { email, message } = route.params || {};
@@ -23,7 +24,9 @@ const OTPVerification = ({ route, navigation }) => {
 
     try {
       setLoading(true);
-      const res = await fetch('http://10.0.2.2:8000/verify-otp', {
+
+      // ← CHANGED THIS LINE
+      const res = await fetch(`${API_BASE_URL}/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp }),
@@ -57,7 +60,7 @@ const OTPVerification = ({ route, navigation }) => {
     <View style={styles.screen}>
       {/* Logo */}
       <Image
-        source={require('../../assets/threatforge_logo.png')} // adjust path if needed
+        source={require('../../assets/threatforge_logo.png')}
         style={styles.logo}
         resizeMode="contain"
       />
@@ -71,6 +74,7 @@ const OTPVerification = ({ route, navigation }) => {
         <TextInput
           style={styles.input}
           placeholder="Enter OTP"
+          placeholderTextColor="#9CA3AF"
           keyboardType="number-pad"
           value={otp}
           onChangeText={setOtp}
@@ -98,7 +102,7 @@ export default OTPVerification;
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#FFFFFF',     
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
     paddingTop: 0,
@@ -107,7 +111,7 @@ const styles = StyleSheet.create({
     width: 200,
     height: 100,
     marginBottom: 50,
-    marginTop: -200, 
+    marginTop: -200,
   },
   form: {
     width: '86%',
@@ -141,6 +145,8 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     marginBottom: 16,
     letterSpacing: 2,
+    color: '#111827'
+
   },
   button: {
     backgroundColor: '#0a6981ff',

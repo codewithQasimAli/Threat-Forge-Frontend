@@ -8,10 +8,10 @@ import {
     StyleSheet,
     Alert,
     ActivityIndicator,
-    Platform,
     ScrollView,
 } from 'react-native';
 import { useUser } from '../context/UserContext';
+import { API_BASE_URL } from '../config/api';
 
 const Chip = ({ label, selected, onPress }) => (
     <TouchableOpacity
@@ -39,57 +39,144 @@ export default function AddDevice({ navigation }) {
 
     const deviceTypeChoices = ['Camera', 'Sensor', 'Light', 'Router', 'Baby Monitor'];
 
+    //  ENHANCED VALIDATION WITH IP/MAC FORMAT CHECK
     const validate = () => {
         if (!deviceName || !ipAddress || !macAddress) {
             Alert.alert('Missing fields', 'Device name, IP address, and MAC address are required.');
             return false;
         }
-        // very light IP check (optional)
-        const ipOk = /^(\d{1,3}\.){3}\d{1,3}$/.test(ipAddress);
-        if (!ipOk) {
-            Alert.alert('Invalid IP', 'Please enter a valid IPv4 address.');
+
+        // IP validation with range check
+        const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
+        if (!ipRegex.test(ipAddress)) {
+            Alert.alert('Invalid IP', 'Please enter a valid IPv4 address (e.g., 192.168.1.100)');
             return false;
         }
-        // light MAC check (optional)
-        const macOk = /^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$/.test(macAddress);
-        if (!macOk) {
-            Alert.alert('Invalid MAC', 'Format must be 00:1A:2B:3C:4D:5E');
+
+        // Check IP octets are 0-255
+        const octets = ipAddress.split('.').map(Number);
+        if (octets.some(octet => octet < 0 || octet > 255)) {
+            Alert.alert('Invalid IP', 'IP address octets must be between 0 and 255');
             return false;
         }
+
+        // Reject invalid/reserved IPs
+        const invalidIPs = ['0.0.0.0', '255.255.255.255'];
+        if (invalidIPs.includes(ipAddress)) {
+            Alert.alert('Invalid IP', 'This IP address cannot be used for devices');
+            return false;
+        }
+
+        // MAC validation (supports : and - separators)
+        const macRegex = /^([0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}$/;
+        if (!macRegex.test(macAddress)) {
+            Alert.alert('Invalid MAC', 'Format must be AA:BB:CC:DD:EE:FF or AA-BB-CC-DD-EE-FF');
+            return false;
+        }
+
         return true;
     };
 
-    const onSave = async () => {
-        if (!validate()) return;
+    // CHECK FOR DUPLICATE IP/MAC
+    const checkDuplicates = async () => {
         try {
-            setSaving(true);
+            // Fetch all devices for this user
+            const res = await fetch(`${API_BASE_URL}/devices/user/${user.id}`);
+            if (!res.ok) throw new Error('Failed to fetch devices');
+            
+            const existingDevices = await res.json();
+
+            // Normalize MAC address for comparison (uppercase, use : separator)
+            const normalizedNewMAC = macAddress.toUpperCase().replace(/-/g, ':');
+
+            // Check for duplicate IP
+            const duplicateIP = existingDevices.find(d => d.ip_address === ipAddress);
+            if (duplicateIP) {
+                Alert.alert(
+                    'Duplicate IP Address',
+                    `Device "${duplicateIP.device_name}" already uses IP address ${ipAddress}.\n\nEach device must have a unique IP address to prevent network conflicts.`
+                );
+                return false;
+            }
+
+            // Check for duplicate MAC
+            const duplicateMAC = existingDevices.find(d => {
+                const existingMAC = d.mac_address.toUpperCase().replace(/-/g, ':');
+                return existingMAC === normalizedNewMAC;
+            });
+            
+            if (duplicateMAC) {
+                Alert.alert(
+                    'Duplicate MAC Address',
+                    `Device "${duplicateMAC.device_name}" already uses MAC address ${macAddress}.\n\nEach device must have a unique MAC address.`
+                );
+                return false;
+            }
+
+            return true; // No duplicates found
+        } catch (e) {
+            console.error('Duplicate check error:', e);
+            Alert.alert('Error', 'Could not validate device. Please check your connection and try again.');
+            return false;
+        }
+    };
+
+    const onSave = async () => {
+        // Validate format
+        if (!validate()) return;
+
+        setSaving(true);
+
+        try {
+            // Check for duplicates
+            const noDuplicates = await checkDuplicates();
+            if (!noDuplicates) {
+                setSaving(false);
+                return;
+            }
+
+            // Create device
             const payload = {
                 device_name: deviceName,
                 device_type: deviceType,
                 ip_address: ipAddress,
-                mac_address: macAddress.toUpperCase(),
+                mac_address: macAddress.toUpperCase().replace(/-/g, ':'), // Normalize to uppercase with :
                 status,
                 user_id: user.id,
             };
 
-            const res = await fetch(`http://10.0.2.2:8000/device`, {
+            const res = await fetch(`${API_BASE_URL}/device`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
             });
+
             const data = await res.json().catch(() => ({}));
+
             if (!res.ok) {
-                Alert.alert('Create failed', data?.detail || 'Please try again.');
+                const errorMessage = data?.detail || 'Please try again.';
+                Alert.alert('Create failed', String(errorMessage));
+                setSaving(false);
                 return;
             }
 
-            Alert.alert('Success', 'Device added successfully.', [
-                { text: 'OK', onPress: () => navigation.navigate('Main', { screen: 'Devices' }) },
-            ]);
+            // Success - Navigate after user dismisses alert
+            Alert.alert(
+                'Success',
+                'Device added successfully.',
+                [
+                    { 
+                        text: 'OK', 
+                        onPress: () => {
+                            setSaving(false);
+                            navigation.navigate('Main', { screen: 'Devices' });
+                        }
+                    }
+                ]
+            );
         } catch (e) {
             console.error('Add device error:', e);
             Alert.alert('Network error', 'Could not reach the server.');
-        } finally {
             setSaving(false);
         }
     };
@@ -98,37 +185,40 @@ export default function AddDevice({ navigation }) {
         <ScrollView style={styles.screen} contentContainerStyle={{ padding: 16 }}>
             <Text style={styles.heading}>Add New Device</Text>
 
-            <Text style={styles.label}>Device Name</Text>
+            <Text style={styles.label}>Device Name *</Text>
             <TextInput
                 style={styles.input}
-                placeholder="Device Name"
+                placeholder="e.g., Living Room Camera"
+                placeholderTextColor="#9CA3AF"
                 value={deviceName}
                 onChangeText={setDeviceName}
             />
 
-            <Text style={styles.label}>Device Type</Text>
+            <Text style={styles.label}>Device Type *</Text>
             <View style={styles.chipsRow}>
                 {deviceTypeChoices.map(t => (
                     <Chip key={t} label={t} selected={deviceType === t} onPress={() => setDeviceType(t)} />
                 ))}
             </View>
 
-            <Text style={styles.label}>IP Address</Text>
+            <Text style={styles.label}>IP Address *</Text>
             <TextInput
                 style={styles.input}
-                placeholder="192.168.0.0"
+                placeholder="192.168.1.100"
+                placeholderTextColor="#9CA3AF"
                 value={ipAddress}
                 onChangeText={setIpAddress}
                 keyboardType="numbers-and-punctuation"
                 autoCapitalize="none"
             />
 
-            <Text style={styles.label}>MAC Address</Text>
+            <Text style={styles.label}>MAC Address *</Text>
             <TextInput
                 style={styles.input}
-                placeholder="00:1A:2B:3C:4D:5E"
+                placeholder="AA:BB:CC:DD:EE:FF"
+                placeholderTextColor="#9CA3AF"
                 value={macAddress}
-                onChangeText={setMacAddress}
+                onChangeText={(text) => setMacAddress(text.toUpperCase())}
                 autoCapitalize="characters"
             />
 
@@ -155,8 +245,8 @@ export default function AddDevice({ navigation }) {
 
 const styles = StyleSheet.create({
     screen: { flex: 1, backgroundColor: '#FFFFFF' },
-    heading: { fontSize: 22, fontWeight: '700', marginBottom: 16 },
-    label: { fontSize: 13, color: '#444', marginTop: 10, marginBottom: 6 },
+    heading: { fontSize: 22, fontWeight: '700', marginBottom: 16, color: '#111827' },
+    label: { fontSize: 13, color: '#444', marginTop: 10, marginBottom: 6, fontWeight: '600' },
     input: {
         backgroundColor: '#fff',
         borderRadius: 8,
@@ -164,10 +254,12 @@ const styles = StyleSheet.create({
         borderColor: '#d2d6dc',
         paddingHorizontal: 12,
         paddingVertical: 10,
+        color: '#111827',
+        fontSize: 15,
     },
     chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
     chip: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 18 },
-    chipText: { color: "#1976D2" },
+    chipText: { color: "#0a6981ff", fontSize: 14 },
     button: {
         marginTop: 20,
         backgroundColor: "#0a6981ff",
