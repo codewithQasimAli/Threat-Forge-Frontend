@@ -4,6 +4,7 @@ import {
   TouchableOpacity, ActivityIndicator, RefreshControl
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useUser } from '../context/UserContext';
 
 const API_BASE = 'http://192.168.137.1:8000';
 
@@ -16,6 +17,7 @@ const SEVERITY_COLORS = {
 };
 
 export default function NetworkLogsScreen() {
+  const { user } = useUser();
   const [logs, setLogs] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -24,12 +26,13 @@ export default function NetworkLogsScreen() {
 
   const fetchData = async () => {
     try {
+      const uid = user?.id || user?.user_id;
       const url = filter === 'all'
-        ? `${API_BASE}/logs/network?limit=50`
-        : `${API_BASE}/logs/network?severity=${filter}&limit=50`;
+        ? `${API_BASE}/logs/network?user_id=${uid}&limit=50`
+        : `${API_BASE}/logs/network?user_id=${uid}&severity=${filter}&limit=50`;
       const [logsRes, statsRes] = await Promise.all([
         fetch(url).then(r => r.ok ? r.json() : []).catch(() => []),
-        fetch(`${API_BASE}/logs/network/stats`).then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch(`${API_BASE}/logs/network/stats?user_id=${uid}`).then(r => r.ok ? r.json() : null).catch(() => null),
       ]);
       setLogs(logsRes);
       setStats(statsRes);

@@ -9,6 +9,7 @@ import {
   Pressable,
   Modal,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useUser } from '../context/UserContext';
 import { API_BASE_URL, WS_BASE_URL } from '../config/api';
@@ -158,6 +159,7 @@ const Alerts = () => {
   const [err, setErr] = useState("");
   const [selectedSeverity, setSelectedSeverity] = useState("all");
   const [showFilterModal, setShowFilterModal] = useState(false);
+  const [summaryStats, setSummaryStats] = useState(null);
   const [wsConnected, setWsConnected] = useState(false);
   
   const wsRef = useRef(null);
@@ -168,7 +170,8 @@ const Alerts = () => {
   const fetchAlerts = useCallback(async () => {
     if (!user?.id) return;
     try {
-      const res = await fetch(`${BASE_URL}/alerts/alerts/user/${user.id}`);
+      const severityParam = selectedSeverity !== 'all' ? `&severity=${selectedSeverity}` : '';
+      const res = await fetch(`${BASE_URL}/alerts/alerts/user/${user.id}?acknowledged=false&limit=500${severityParam}`);
       const data = await res.json().catch(() => []);
       
       if (!res.ok) {
@@ -178,6 +181,13 @@ const Alerts = () => {
       
       console.log('alerts fetched:', data.length);
       setAlerts(data);
+      try {
+        const summaryRes = await fetch(`${BASE_URL}/alerts/alerts/summary/user/${user.id}`);
+        if (summaryRes.ok) {
+          const summaryData = await summaryRes.json();
+          setSummaryStats(summaryData);
+        }
+      } catch (e) {}
       setErr("");
     } catch (e) {
       console.error('alerts fetch error:', e);
@@ -187,7 +197,7 @@ const Alerts = () => {
     } finally {
       setLoading(false);
     }
-  }, [user?.id]);
+  }, [user?.id, selectedSeverity]);
 
   // WebSocket connection
   const connectWebSocket = useCallback(() => {
@@ -281,12 +291,14 @@ const Alerts = () => {
     }
   }, [user?.id]);
 
-  // Initial fetch + Connect WebSocket
-  useEffect(() => {
-    fetchAlerts();
-    connectWebSocket();
+  useFocusEffect(
+    useCallback(() => {
+      fetchAlerts();
+    }, [fetchAlerts, selectedSeverity])
+  );
 
-    // Cleanup on unmount
+  useEffect(() => {
+    connectWebSocket();
     return () => {
       if (wsRef.current) {
         wsRef.current.close();
@@ -295,7 +307,7 @@ const Alerts = () => {
         clearTimeout(reconnectTimeoutRef.current);
       }
     };
-  }, [fetchAlerts, connectWebSocket]);
+  }, [connectWebSocket]);
 
   const handleAcknowledge = useCallback(async (id) => {
     try {
@@ -313,13 +325,20 @@ const Alerts = () => {
       }
 
       setAlerts((prev) => prev.map(a => a.id === id ? { ...a, acknowledged: true } : a));
+      try {
+        const summaryRes = await fetch(`${BASE_URL}/alerts/alerts/summary/user/${user.id}`);
+        if (summaryRes.ok) {
+          const summaryData = await summaryRes.json();
+          setSummaryStats(summaryData);
+        }
+      } catch (e) {}
       Alert.alert('Success', 'Alert acknowledged successfully.');
     } catch (e) {
       console.error('acknowledge error:', e);
       const errorMsg = e.message || 'Failed to acknowledge alert.';
       Alert.alert('Error', String(errorMsg));
     }
-  }, []);
+  }, [user?.id]);
 
   if (loading) {
     return (
@@ -342,17 +361,17 @@ const Alerts = () => {
     );
   }
 
-  let visibleAlerts = alerts.filter(a => !a.acknowledged);
-  
-  if (selectedSeverity !== "all") {
-    visibleAlerts = visibleAlerts.filter(
-      a => (a.severity || "").toLowerCase() === selectedSeverity
-    );
-  }
+  let visibleAlerts = [...alerts];
   
   visibleAlerts = visibleAlerts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
-  const severityCounts = {
+  const severityCounts = summaryStats ? {
+    all: summaryStats.unacknowledged || 0,
+    critical: summaryStats.by_severity?.critical || 0,
+    high: summaryStats.by_severity?.high || 0,
+    medium: summaryStats.by_severity?.medium || 0,
+    low: summaryStats.by_severity?.low || 0,
+  } : {
     all: alerts.filter(a => !a.acknowledged).length,
     critical: alerts.filter(a => !a.acknowledged && (a.severity || "").toLowerCase() === "critical").length,
     high: alerts.filter(a => !a.acknowledged && (a.severity || "").toLowerCase() === "high").length,
@@ -369,7 +388,7 @@ const Alerts = () => {
             backgroundColor: wsConnected ? '#10B981' : '#EF4444' 
           }]} />
         </View>
-        <Pressable 
+        <Pressable
           style={styles.filterButton}
           onPress={() => setShowFilterModal(true)}
         >

@@ -141,9 +141,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: 0,
-    marginBottom: 200,
+    paddingTop: 40,
   },
   form: {
     width: '86%',

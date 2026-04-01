@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, StyleSheet, ScrollView,
   TouchableOpacity, ActivityIndicator, RefreshControl
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useUser } from '../context/UserContext';
 
@@ -29,10 +30,10 @@ export default function Home({ navigation }) {
     try {
       const userId = user?.id || user?.user_id;
       const [devRes, alertRes, simRes, logRes, recentRes] = await Promise.all([
-        fetch(`${API_BASE}/devices/devices?user_id=${userId}`).then(r => r.ok ? r.json() : []).catch(() => []),
+        fetch(`${API_BASE}/devices/user/${userId}`).then(r => r.ok ? r.json() : []).catch(() => []),
         fetch(`${API_BASE}/alerts/alerts/summary/user/${userId}`).then(r => r.ok ? r.json() : null).catch(() => null),
-        fetch(`${API_BASE}/simulation/latest`).then(r => r.ok ? r.json() : null).catch(() => null),
-        fetch(`${API_BASE}/logs/network/stats`).then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch(`${API_BASE}/simulation/latest?user_id=${userId}`).then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch(`${API_BASE}/logs/network/stats?user_id=${userId}`).then(r => r.ok ? r.json() : null).catch(() => null),
         fetch(`${API_BASE}/alerts/alerts/user/${userId}?limit=3`).then(r => r.ok ? r.json() : []).catch(() => []),
       ]);
       setDevices(Array.isArray(devRes) ? devRes : devRes?.devices || []);
@@ -48,12 +49,16 @@ export default function Home({ navigation }) {
     }
   };
 
-  useEffect(() => { fetchDashboardData(); }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchDashboardData();
+    }, [])
+  );
   const onRefresh = () => { setRefreshing(true); fetchDashboardData(); };
 
   const getTotalAlerts = () => {
     if (!alertStats) return 0;
-    return (alertStats.critical || 0) + (alertStats.high || 0) + (alertStats.medium || 0) + (alertStats.low || 0);
+    return alertStats.unacknowledged || 0;
   };
 
   const formatTime = (iso) => {
@@ -119,8 +124,8 @@ export default function Home({ navigation }) {
           <Text style={styles.sectionTitle}>Alert Severity Breakdown</Text>
           <View style={styles.card}>
             {['critical', 'high', 'medium', 'low'].map(s => {
-              const count = alertStats[s] || 0;
-              const total = getTotalAlerts();
+              const count = alertStats?.by_severity?.[s] || 0;
+              const total = alertStats.total_alerts || 0;
               const pct = total > 0 ? (count / total) : 0;
               return (
                 <View key={s} style={styles.severityRow}>

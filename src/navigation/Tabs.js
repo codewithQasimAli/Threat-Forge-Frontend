@@ -7,7 +7,6 @@ import Alerts from '../screens/Alerts';
 import SimulationScreen from '../screens/SimulationScreen';
 import NetworkLogsScreen from '../screens/NetworkLogsScreen';
 import ReportsScreen from '../screens/ReportsScreen';
-import Settings from '../screens/Settings';
 
 const Tab = createBottomTabNavigator();
 
@@ -46,7 +45,6 @@ export default function AppTabs() {
       <Tab.Screen name="Simulation" component={SimulationScreen} />
       <Tab.Screen name="Logs" component={NetworkLogsScreen} />
       <Tab.Screen name="Reports" component={ReportsScreen} />
-      <Tab.Screen name="Settings" component={Settings} />
     </Tab.Navigator>
   );
 }

@@ -4,6 +4,7 @@ import {
   TouchableOpacity, ActivityIndicator, RefreshControl
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useUser } from '../context/UserContext';
 
 const API_BASE = 'http://192.168.137.1:8000';
 
@@ -13,13 +14,14 @@ export default function SimulationScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
+  const { user } = useUser();
 
   const fetchData = async () => {
     try {
       setError(null);
       const [latestRes, historyRes] = await Promise.all([
-        fetch(`${API_BASE}/simulation/latest`).then(r => r.ok ? r.json() : null).catch(() => null),
-        fetch(`${API_BASE}/simulation/history?limit=5`).then(r => r.ok ? r.json() : []).catch(() => []),
+        fetch(`${API_BASE}/simulation/latest?user_id=${user?.id || user?.user_id}`).then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch(`${API_BASE}/simulation/history?limit=5&user_id=${user?.id || user?.user_id}`).then(r => r.ok ? r.json() : []).catch(() => []),
       ]);
       setLatest(latestRes);
       setHistory(historyRes || []);
