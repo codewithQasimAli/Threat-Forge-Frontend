@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "288665567116",
+    "project_id": "threatforge-f690e",
+    "storage_bucket": "threatforge-f690e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:288665567116:android:ee3646652173fdb0fca0a9",
+        "android_client_info": {
+          "package_name": "com.frontend2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBxoE6-nP08TqSUbUGS31nVbBW9oSTVIws"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

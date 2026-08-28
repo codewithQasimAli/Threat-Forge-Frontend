@@ -8,6 +8,7 @@ import {
   Alert,
   Pressable,
   Modal,
+  ScrollView,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -161,7 +162,10 @@ const Alerts = () => {
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [summaryStats, setSummaryStats] = useState(null);
   const [wsConnected, setWsConnected] = useState(false);
-  
+  const [dateRange, setDateRange] = useState('all');
+  const [selectedDeviceId, setSelectedDeviceId] = useState(null);
+  const [devices, setDevices] = useState([]);
+
   const wsRef = useRef(null);
   const reconnectTimeoutRef = useRef(null);
   const reconnectAttempts = useRef(0);
@@ -171,14 +175,27 @@ const Alerts = () => {
     if (!user?.id) return;
     try {
       const severityParam = selectedSeverity !== 'all' ? `&severity=${selectedSeverity}` : '';
-      const res = await fetch(`${BASE_URL}/alerts/alerts/user/${user.id}?acknowledged=false&limit=500${severityParam}`);
+      const deviceParam = selectedDeviceId ? `&device_id=${selectedDeviceId}` : '';
+
+      let dateParams = '';
+      const today = new Date();
+      const fmt = (d) => d.toISOString().split('T')[0];
+      if (dateRange === 'today') {
+        dateParams = `&start_date=${fmt(today)}&end_date=${fmt(today)}`;
+      } else if (dateRange === '7days') {
+        const from = new Date(today); from.setDate(from.getDate() - 7);
+        dateParams = `&start_date=${fmt(from)}&end_date=${fmt(today)}`;
+      } else if (dateRange === '30days') {
+        const from = new Date(today); from.setDate(from.getDate() - 30);
+        dateParams = `&start_date=${fmt(from)}&end_date=${fmt(today)}`;
+      }
+
+      const res = await fetch(`${BASE_URL}/alerts/alerts/user/${user.id}?acknowledged=false&limit=500${severityParam}${deviceParam}${dateParams}`);
       const data = await res.json().catch(() => []);
-      
       if (!res.ok) {
         const errorMessage = data?.detail || 'Failed to fetch alerts';
         throw new Error(String(errorMessage));
       }
-      
       console.log('alerts fetched:', data.length);
       setAlerts(data);
       try {
@@ -197,7 +214,7 @@ const Alerts = () => {
     } finally {
       setLoading(false);
     }
-  }, [user?.id, selectedSeverity]);
+  }, [user?.id, selectedSeverity, selectedDeviceId, dateRange]);
 
   // WebSocket connection
   const connectWebSocket = useCallback(() => {
@@ -309,6 +326,14 @@ const Alerts = () => {
     };
   }, [connectWebSocket]);
 
+  useEffect(() => {
+    if (!user?.id) return;
+    fetch(`${BASE_URL}/devices/user/${user.id}`)
+      .then(r => r.json())
+      .then(data => { if (Array.isArray(data)) setDevices(data); })
+      .catch(() => {});
+  }, [user?.id]);
+
   const handleAcknowledge = useCallback(async (id) => {
     try {
       const res = await fetch(`${BASE_URL}/alerts/alerts/${id}`, {
@@ -408,6 +433,57 @@ const Alerts = () => {
         onSelectSeverity={setSelectedSeverity}
         counts={severityCounts}
       />
+
+      {/* Date Range Filter Chips */}
+      <View style={styles.chipRow}>
+        {[
+          { key: 'all', label: 'All Time' },
+          { key: 'today', label: 'Today' },
+          { key: '7days', label: '7 Days' },
+          { key: '30days', label: '30 Days' },
+        ].map(opt => (
+          <Pressable
+            key={opt.key}
+            onPress={() => setDateRange(opt.key)}
+            style={[styles.chip, dateRange === opt.key && styles.chipActive]}
+          >
+            <Text style={[styles.chipText, dateRange === opt.key && styles.chipTextActive]}>
+              {opt.label}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+
+      {/* Device Filter Chips */}
+      {devices.length > 0 && (
+        <View style={styles.chipScroll}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.chipScrollContent}
+        >
+          <Pressable
+            onPress={() => setSelectedDeviceId(null)}
+            style={[styles.chip, selectedDeviceId === null && styles.chipActive]}
+          >
+            <Text style={[styles.chipText, selectedDeviceId === null && styles.chipTextActive]}>
+              All Devices
+            </Text>
+          </Pressable>
+          {devices.map(d => (
+            <Pressable
+              key={d.id}
+              onPress={() => setSelectedDeviceId(d.id)}
+              style={[styles.chip, selectedDeviceId === d.id && styles.chipActive]}
+            >
+              <Text style={[styles.chipText, selectedDeviceId === d.id && styles.chipTextActive]}>
+                {d.device_name}
+              </Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+        </View>
+      )}
 
       <FlatList
         data={visibleAlerts}
@@ -659,7 +735,7 @@ const styles = StyleSheet.create({
   },
   emptyContainer: {
     alignItems: 'center',
-    paddingVertical: 60,
+    paddingVertical: 20,
   },
   emptyText: {
     fontSize: 18,
@@ -672,6 +748,47 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     marginTop: 4,
     textAlign: 'center',
+  },
+  chipRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 4,
+  },
+  chip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    backgroundColor: '#F3F4F6',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  chipActive: {
+    backgroundColor: '#0a6981ff',
+    borderColor: '#0a6981ff',
+  },
+  chipText: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#374151',
+  },
+  chipTextActive: {
+    color: '#ffffff',
+    fontWeight: '700',
+  },
+  chipScroll: {
+    height: 44,
+    paddingHorizontal: 16,
+    marginBottom: 4,
+    overflow: 'hidden',
+  },
+  chipScrollContent: {
+    flexDirection: 'row',
+    gap: 8,
+    alignItems: 'center',
+    paddingRight: 16,
   },
 });
 

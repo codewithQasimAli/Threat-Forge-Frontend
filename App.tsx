@@ -5,8 +5,11 @@
  * @format
  */
 
+import { useEffect } from 'react';
 import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View, Text, Image, TouchableOpacity } from 'react-native';
+import messaging from '@react-native-firebase/messaging';
+import { useUser } from './src/context/UserContext';
+import { StatusBar, StyleSheet, useColorScheme, View, Text, Image, TouchableOpacity, PermissionsAndroid, Platform } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {
   SafeAreaProvider,
@@ -33,6 +36,40 @@ import { UserProvider } from './src/context/UserContext';
 const Stack = createNativeStackNavigator()
 
 const StackNavigator = () => {
+  const { user } = useUser();
+
+  useEffect(() => {
+    if (Platform.OS === 'android' && Platform.Version >= 33) {
+      PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
+    }
+
+    const unsubscribeOnMessage = messaging().onMessage(async remoteMessage => {
+      // App is in foreground — WebSocket already updates the UI live.
+      // Intentionally no-op to avoid a duplicate notification banner.
+    });
+
+    return unsubscribeOnMessage;
+  }, []);
+
+  useEffect(() => {
+    const unsubscribeRefresh = messaging().onTokenRefresh(async newToken => {
+      if (user?.id) {
+        try {
+          const { API_BASE_URL } = require('./src/config/api');
+          await fetch(`${API_BASE_URL}/fcm-token`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: user.id, fcm_token: newToken }),
+          });
+        } catch (e) {
+          console.log('FCM token refresh POST failed:', e);
+        }
+      }
+    });
+
+    return unsubscribeRefresh;
+  }, [user]);
+
   return (
     <Stack.Navigator initialRouteName='Login'
       screenOptions={({ navigation }) => ({

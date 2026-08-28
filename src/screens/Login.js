@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import messaging from '@react-native-firebase/messaging';
 import { useUser } from '../context/UserContext';
 import { API_BASE_URL } from '../config/api';  // ← ADDED THIS
 
@@ -45,6 +46,16 @@ const Login = ({ navigation }) => {
       }
 
       setUserData(data.user);
+      try {
+        const fcmToken = await messaging().getToken();
+        await fetch(`${API_BASE_URL}/fcm-token`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: data.user.id, fcm_token: fcmToken }),
+        });
+      } catch (e) {
+        console.log('FCM token registration failed:', e);
+      }
       Alert.alert('Success', 'Logged in successfully. ', [
         { text: 'OK', onPress: () => navigation.replace('Main') },
       ]);
